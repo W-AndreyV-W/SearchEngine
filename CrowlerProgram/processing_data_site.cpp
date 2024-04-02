@@ -11,6 +11,7 @@ ProcessingDataSite::~ProcessingDataSite() {
 
 	delete adressWebsite;
 	delete wordCount;
+	delete dataWebsite;
 }
 
 std::string ProcessingDataSite::adressWebsiteInDatabase() {
@@ -29,7 +30,8 @@ std::set<std::string> ProcessingDataSite::adressWebsiteForSearch() {
 }
 
 void ProcessingDataSite::processing(std::vector<std::string> data) {
-	
+			
+	delete dataWebsite;
 	delete adressWebsite;
 	delete wordCount;
 	adressWebsite = new std::set<std::string>;
@@ -66,10 +68,8 @@ void ProcessingDataSite::processing(std::vector<std::string> data) {
 			}
 		}
 
-		delete dataWebsite;
+
 	}
-	//delete wordCount;///!!!!!!!!!!!!!!!!!!!!!!!!!!
-	
 }
 
 size_t ProcessingDataSite::addressProcessing(size_t index) {
@@ -78,23 +78,9 @@ size_t ProcessingDataSite::addressProcessing(size_t index) {
 
 	try {
 
-		if (dataWebsite->at(2).substr(index + 9) == "#") {
-
-			indexBegin = dataWebsite->at(2).find('/', index + 9);
-		}
-
 		size_t indexEnd = dataWebsite->at(2).find_first_of(separatorsAdress, indexBegin + 1);
 
-		if (indexBegin != std::string::npos && indexEnd != std::string::npos) {
-
-			if (dataWebsite->at(2).substr(indexBegin, 2) == "//") {
-
-				indexBegin += 2;
-			}
-			else if (dataWebsite->at(2).substr(indexBegin - 2, 3) == "../") {
-
-				indexBegin -= 2;
-			}
+		if (indexEnd != std::string::npos) {
 
 			if (dataWebsite->at(2).substr(indexEnd - 5, 5) == ".html" || dataWebsite->at(2).substr(indexEnd - 4, 4) == ".php") {
 
@@ -115,35 +101,36 @@ size_t ProcessingDataSite::addressProcessing(size_t index) {
 
 void ProcessingDataSite::addressNormalization(std::string adress) {
 
+	if (adress.substr(0, 7) != "http://" && adress.substr(0, 8) != "https://") {
 
-	if (adress.substr(0, 3) == "../") {
+		if (adress.substr(0, 3) == "../") {
 
-		size_t sizeAdress = dataWebsite->at(1).size();
+			size_t sizeAdress = dataWebsite->at(1).size();
 
-		do {
+			do {
 
-			adress.erase(0, 3);
-			size_t indexAdress = dataWebsite->at(1).rfind('/', sizeAdress - 1);
+				adress.erase(0, 3);
+				size_t indexAdress = dataWebsite->at(1).rfind('/', sizeAdress - 1);
 
-			if (indexAdress != std::string::npos) {
+				if (indexAdress != std::string::npos) {
 
-				sizeAdress = indexAdress + 1;
-			}
+					sizeAdress = indexAdress + 1;
+				}
 
-		} while (adress.substr(0, 3) == "../");
+			} while (adress.substr(0, 3) == "../");
 
-		adress = dataWebsite->at(1).substr(0, sizeAdress) + adress;
+			adress = dataWebsite->at(1).substr(0, sizeAdress) + adress;
+		}
+		else if (adress.substr(0, 1) == "/") {
+
+			size_t sizeAdress = dataWebsite->at(1).find('/', 8);
+			adress = dataWebsite->at(1).substr(0, sizeAdress) + adress;
+		}
+		else if (adress.substr(0, 1) == "#") {
+
+			adress = dataWebsite->at(1) + adress;
+		}
 	}
-	else if (adress.substr(0, 1) == "/") {
-
-		size_t sizeAdress = dataWebsite->at(1).find('/', 1);
-		adress = dataWebsite->at(1).substr(0, sizeAdress) + adress;
-	}
-	else if (adress.substr(0, 1) == "#") {
-
-		adress = dataWebsite->at(1) + adress;
-	}
-
 
 	if (adress != dataWebsite->at(1)) {
 

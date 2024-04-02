@@ -17,6 +17,8 @@ bool IniFileOpen::iniParser(const std::string filename) {
 
             dataPerser(line, numberLine);
         }
+
+        iniFile.close();
     }
     else {
 

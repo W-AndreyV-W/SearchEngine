@@ -1,8 +1,8 @@
 #include "database_website.h"
 
-DatabaseWebsite::DatabaseWebsite(std::vector<std::string> connectionData, bool createDate) {
+DatabaseWebsite::DatabaseWebsite(std::vector<std::string> connectionData) {
 
-    connectDatabase(connectionData, createDate);
+    connectDatabase(connectionData);
 }
 
 DatabaseWebsite::~DatabaseWebsite() {
@@ -10,7 +10,7 @@ DatabaseWebsite::~DatabaseWebsite() {
     delete sql;
 }
 
-void DatabaseWebsite::connectDatabase(std::vector<std::string> connectionData, bool createDate) {
+void DatabaseWebsite::connectDatabase(std::vector<std::string> connectionData) {
 
     std::string sqlConnectionData = "host=" + connectionData[0] +
                                     " port=" + connectionData[1] +
@@ -21,25 +21,24 @@ void DatabaseWebsite::connectDatabase(std::vector<std::string> connectionData, b
     try {
 
         sql = new pqxx::connection(sqlConnectionData);
-        creatingDatabase(createDate);
     }
     catch (std::exception& error) {
     }
 }
 
-std::map<std::string, int>* DatabaseWebsite::requestDatabase(std::string request, int numberLines) {
+std::map<std::string, int> DatabaseWebsite::requestDatabase(std::string request, int numberLines) {
 
-    std::map<std::string, int>* answer = new std::map<std::string, int>;
+    std::map<std::string, int> answer;
 
     try {
-
+       
         pqxx::work selectSQL{ *sql };
         std::string lines = std::to_string(numberLines);
 
         for (const auto& [website, number] : selectSQL.stream<std::string, int>(selectData1 + selectSQL.esc(request) +
             selectData2 + lines + selectData3)) {
 
-            answer->emplace(website, number);
+            answer.emplace(website, number);
         }
 
         selectSQL.commit();
@@ -47,10 +46,10 @@ std::map<std::string, int>* DatabaseWebsite::requestDatabase(std::string request
     catch (std::exception& error) {
     }
 
-    return std::move(answer);
+    return answer;
 }
 
-bool DatabaseWebsite::writingDatabase(std::string adress, std::map<std::string, int>* searchData) {
+bool DatabaseWebsite::writingDatabase(std::string adress, std::map<std::string, int> searchData) {
 
     bool noError = true;
 
@@ -58,10 +57,9 @@ bool DatabaseWebsite::writingDatabase(std::string adress, std::map<std::string, 
 
         pqxx::work insertSQL{ *sql };
 
-        for (const auto& data : *searchData) {
+        for (const auto& data : searchData) {
 
             std::string simNumber = std::to_string(data.second);
-
             pqxx::result rows = insertSQL.exec(insertData1 + insertSQL.esc(adress) +
                                                insertData2 + insertSQL.esc(data.first) +
                                                insertData3 + insertSQL.esc(simNumber) +
@@ -83,18 +81,18 @@ bool DatabaseWebsite::writingDatabase(std::string adress, std::map<std::string, 
     return noError;
 }
 
-void DatabaseWebsite::creatingDatabase(bool createDate) {
+bool DatabaseWebsite::creatingDatabase() {
 
-    if (createDate) {
+    try {
 
-        try {
-
-            pqxx::work createSQL{ *sql };
-
-            createSQL.exec(createTableIfNotExists);
-            createSQL.commit();
-        }
-        catch (std::exception& error) {
-        }
+        pqxx::work createSQL{ *sql };
+        createSQL.exec(createTableIfNotExists);
+        createSQL.commit();
     }
+    catch (std::exception& error) {
+
+        return false;
+    }
+
+    return true;
 }

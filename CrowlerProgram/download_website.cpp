@@ -1,34 +1,26 @@
 #include "download_website.h"
 
 DownloadWebsite::DownloadWebsite() {
+
+    requestWeb = new std::vector<std::string>(3);
+    requestWeb->at(1) = "443";
 }
 
 DownloadWebsite::~DownloadWebsite() {
 
-    http—lient.~shared_ptr();
-    delete ioContext;
-    delete sslContext;
     delete requestWeb;
     delete dataWebsite;
 }
 
 bool DownloadWebsite::download(std::vector<std::string> request) {
 
-    requestWeb = new std::vector<std::string>(3);
-    requestWeb->at(1) = "443";
-
     try { 
 
-        processingAddress(request, 0);
-        
+        processingRequest(request.at(0));
+
         if (request.size() > 1 && !request.at(1).empty()) {
 
-            requestWeb->at(1) = request.at(1);
-        }
-
-        if (request.size() > 2 && !request.at(2).empty()) {
-
-            version = static_cast<int>(std::stoi(request.at(3)));
+            version = static_cast<int>(std::stoi(request.at(1)));
         }
     }
     catch (std::exception const& errorMessage) {
@@ -38,12 +30,12 @@ bool DownloadWebsite::download(std::vector<std::string> request) {
         return false;
     }
 
-    return requestWebsite();
+    return responseWebsite();
 }
 
 std::vector<std::string> DownloadWebsite::getRequest() {
 
-    dataWebsite->at(1) = requestWeb->at(0) + requestWeb->at(2);
+    //dataWebsite->at(1) = requestWeb->at(0) + requestWeb->at(2);
 
     return *dataWebsite;
 }
@@ -53,76 +45,134 @@ std::string DownloadWebsite::getDownloadError() {
     return nameError;
 }
 
-void DownloadWebsite::newContext() {
-
-    ioContext = new net::io_context;
-    sslContext = new ssl::context{ ssl::context::tlsv12_client };
+bool DownloadWebsite::requestWebsite(){
     
-    load_root_certificates(*sslContext);
-    sslContext->set_verify_mode(ssl::verify_peer);
+    net::io_context ioContext;
+    bool error = false;
 
-    http—lient = std::make_shared<HTTP—lient>(net::make_strand(*ioContext), *sslContext);
-    http—lient->run(requestWeb->at(0).data(), requestWeb->at(1).data(), requestWeb->at(2).data(), version);
-    
-    ioContext->run();
+    if (requestWeb->at(1) == "443") {
+
+        ssl::context sslContext{ ssl::context::tlsv12_client };
+        load_root_certificates(sslContext);
+        sslContext.set_verify_mode(ssl::verify_peer);
+
+        std::shared_ptr<HTTPS—lient> https—lient = std::make_shared<HTTPS—lient>(net::make_strand(ioContext), sslContext);
+        https—lient->run(requestWeb->at(0).data(), requestWeb->at(1).data(), requestWeb->at(2).data(), version);
+        ioContext.run();
+        error = https—lient->getHTTPError(nameError);
+
+        if (error) {
+
+            if (dataWebsite != nullptr) {
+
+                delete dataWebsite;
+            }
+
+            dataWebsite = new std::vector<std::string>(3);
+
+            *dataWebsite = https—lient->getRequest();
+        }
+    }
+    else {
+
+        std::shared_ptr<HTTP—lient> http—lient = std::make_shared<HTTP—lient>(ioContext);
+        http—lient->run(requestWeb->at(0).data(), requestWeb->at(1).data(), requestWeb->at(2).data(), version);
+        ioContext.run();
+        error = http—lient->getHTTPError(nameError);
+
+        if (error) {
+
+            if (dataWebsite != nullptr) {
+
+                delete dataWebsite;
+            }
+
+            dataWebsite = new std::vector<std::string>(3);
+
+            *dataWebsite = http—lient->getRequest();
+        }
+    }
+   
+    return error;
 }
 
-bool DownloadWebsite::requestWebsite() {
+bool DownloadWebsite::responseWebsite(int recursion) {
 
+    errorHTTP = false;
 
     try {
 
-        newContext();
+        if (requestWebsite()) {
 
+            if (dataWebsite->at(0) == "200") {
 
-        if (!http—lient->getHTTPError(nameError)) {
+                errorHTTP = true;
 
-            dataWebsite = new std::vector<std::string>(http—lient->getRequest());
+                if (requestWeb->at(1) == "443") {
 
+                    dataWebsite->at(1) = urls::pct_string_view("https://" + requestWeb->at(0) + requestWeb->at(2)).decode();
+                }
+                else {
 
+                    dataWebsite->at(1) = urls::pct_string_view("http://" + requestWeb->at(0) + requestWeb->at(2)).decode();
+                }
+            }
+            else if  (!dataWebsite->at(1).empty() && recursion == 0){
 
-            return true;
+                processingRequest(dataWebsite->at(1));
+                responseWebsite(1);
+            }
         }
+        else {
 
-        dataWebsite = new std::vector<std::string>(3);
-        dataWebsite->at(0) = "000";
-
+            nameError = dataWebsite->at(0);
+            dataWebsite->at(0) = "000";
+        }
     } 
     catch (std::exception const& errorMessage) {
 
         nameError = errorMessage.what();
         return false;
     }
-
-    return false;
+    //std::cout << dataWebsite->at(2) << std::endl;
+    return errorHTTP;
 }
 
-void DownloadWebsite::processingAddress(std::vector<std::string>& request, int i) {
+void DownloadWebsite::processingRequest(std::string& request) {
 
-    size_t index = request.at(i).find("/");
+    if (request.substr(0, 7) == "http://") {
+
+        requestWeb->at(1) = "80";
+    }
+
+    if (request.substr(0, 8) == "https://") {
+
+        requestWeb->at(1) = "443";
+    }
+
+    size_t index = request.find("/");
 
     if (index != std::string::npos) {
 
-        if (index + 1 < request.at(i).size()) {
+        if (index + 1 < request.size()) {
 
-            if (request.at(i).substr(index, 2) == "//") {
+            if (request.substr(index, 2) == "//") {
 
-                request.at(i).erase(0, index + 2);
-                index = request.at(i).find("/");
+                request.erase(0, index + 2);
+                index = request.find("/");
             }
         }
 
         if (index != std::string::npos) {
 
-            requestWeb->at(0) = request.at(i).substr(0, index);
-            requestWeb->at(2) = request.at(i).substr(index);
+            requestWeb->at(0) = request.substr(0, index);
+            requestWeb->at(2) = request.substr(index);
         }
     }
     else {
 
-        requestWeb->at(0) = request.at(i);
+        requestWeb->at(0) = request;
         requestWeb->at(2) = "/";
     }
-
     //std::cout << requestWeb->at(0) << requestWeb->at(2) << std::endl;
 }

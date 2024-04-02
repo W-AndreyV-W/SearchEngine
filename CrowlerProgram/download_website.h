@@ -2,12 +2,14 @@
 
 #include <iostream>
 #include <memory>
-
 #include <boost\asio\strand.hpp>
+#include <boost/url/pct_string_view.hpp>
+
 #include "libs\beast\example\common\root_certificates.hpp"
-
 #include "http_client.h"
+#include "https_client.h"
 
+namespace urls = boost::urls;
 namespace net = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
@@ -24,17 +26,13 @@ public:
     std::string getDownloadError();
 
 private:
-
-    net::io_context* ioContext = nullptr;
-    ssl::context* sslContext = nullptr;
-    std::shared_ptr<HTTP—lient> http—lient = nullptr;
-
+    
     int version = 11;
+    bool errorHTTP = false;
     std::string nameError;
     std::vector<std::string>* requestWeb = nullptr;
     std::vector<std::string>* dataWebsite = nullptr;
-
-    void newContext();
     bool requestWebsite();
-    void processingAddress(std::vector<std::string>& request, int i);
+    bool responseWebsite(int recursion = 0);
+    void processingRequest(std::string& request);
 };

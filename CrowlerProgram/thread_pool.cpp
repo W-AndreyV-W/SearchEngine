@@ -6,13 +6,13 @@ ThreadPool::ThreadPool(std::vector<std::string> initialData) {
 	poolAdress = new std::vector<std::pair<std::string, int>>;
 	numberThreads = std::thread::hardware_concurrency();
 
-	databaseInit->push_back(initialData.at(0));
-	databaseInit->push_back(initialData.at(1));
-	databaseInit->push_back(initialData.at(2));
-	databaseInit->push_back(initialData.at(3));
-	databaseInit->push_back(initialData.at(4));
+	databaseInit->at(0) = initialData.at(0);
+	databaseInit->at(1) = initialData.at(1);
+	databaseInit->at(2) = initialData.at(2);
+	databaseInit->at(3) = initialData.at(3);
+	databaseInit->at(4) = initialData.at(4);
 	poolAdress->emplace_back(std::pair<std::string, int>(initialData.at(5), std::stoi(initialData.at(6))));
-	
+
 	poolScanningWebsite();
 }
 
@@ -24,79 +24,69 @@ ThreadPool::~ThreadPool() {
 
 void ThreadPool::poolScanningWebsite() {
 
-	poolThread = new std::vector<std::jthread>(numberThreads);
+	DatabaseWebsite databaseWebsite(*databaseInit);
 
-	for (int i = 0; i < numberThreads; i++) {
+	if (databaseWebsite.creatingDatabase()) {
 
-		if (i == 0) {
+		poolThread = new std::vector<std::jthread>(numberThreads);
 
-			poolThread->push_back(std::jthread(&ThreadPool::scanningWebsite, this, true));
-		}
-		else {
+		for (int i = 0; i < numberThreads; i++) {
 
-			poolThread->push_back(std::jthread(&ThreadPool::scanningWebsite, this, false));
-		}
+			poolThread->push_back(std::jthread(&ThreadPool::scanningWebsite, this));
+		};
 	}
 }
 
-void ThreadPool::scanningWebsite(bool createDate) {
+void ThreadPool::scanningWebsite() {
 
-	DownloadWebsite* downloadWebsite;
+	DownloadWebsite downloadWebsite;
 	ProcessingDataSite processingDataSite;
-	//DatabaseWebsite databaseWebsite(databaseInit, createDate);
-	
-
+	std::unique_lock lock(block);
+	DatabaseWebsite databaseWebsite(*databaseInit);
+	lock.unlock();
 	int search = 0;
-	std::vector<std::string> request = { {""} };
-	std::map<std::string, int> poolAdressFunction;
+	std::vector<std::string> request(1);
 
 	while (true) {
-
-		downloadWebsite = new DownloadWebsite;
 		
 		bool working = readingFromAddressPool(request, search);
 
-
 		if (working) {
 
-			
+			if (downloadWebsite.download(request)) {
+				
+				processingDataSite.processing(downloadWebsite.getRequest());
 
-			downloadWebsite->download(request);
+				std::jthread saveDatabese([&]() {
+					databaseWebsite.writingDatabase(processingDataSite.adressWebsiteInDatabase(), processingDataSite.wordCounInDatabasee()); 
+					}
+				);
 
-			processingDataSite.processing(downloadWebsite->getRequest());
-;
-			//std::thread saveDatabese([]() {
-			//	databaseWebsite.writingDatabase(processingDataSite.adressWebsiteInDatabase(), processingDataSite.wordCounInDatabasee()); 
-			//	}
-			//);
+				savingInAddressPool(processingDataSite.adressWebsiteForSearch(), search);
 
-			savingInAddressPool(processingDataSite.adressWebsiteForSearch(), search);
-
-			delete downloadWebsite;
-			disablingThreadPool();
-			//saveDatabese.join();
-
+				disablingThreadPool();
+			}
 		}
 		else {
 			
 			waitingAddress();
 		}
 
-		std::unique_lock<std::mutex> lock(block);
+		std::lock_guard lock(block);
 
 		if (!threadIsRunning) {
 
 			break;
 		}
 	}
+	//std::cout << "!!!!!!!!!!!!" << std::endl;
 }
 
 
 
 bool ThreadPool::readingFromAddressPool(std::vector<std::string>& request, int& search) {
 
-	std::unique_lock<std::mutex> lock(block);
-	blokThread;
+	std::lock_guard lock(block);
 
 	if (indexPoolAdress < poolAdress->size()) {
 
@@ -107,7 +97,6 @@ bool ThreadPool::readingFromAddressPool(std::vector<std::string>& request, int& 
 
 		std::cout << poolAdress->size() << " " << indexPoolAdress << " " << request.at(0) << std::endl;
 
-		blokThread;
 		return true;
 	}
 
@@ -119,11 +108,9 @@ void ThreadPool::savingInAddressPool(std::set<std::string> adressWebsite, int se
 
 	if (search > 0) {
 		
-		std::unique_lock<std::mutex> lock(block);
-		blokThread;
+		std::lock_guard lock(block);
 
 		for (const auto& adressInPool : adressWebsite) {
-
 
 			for (size_t n = 0; n < poolAdress->size(); n++) {
 
@@ -139,19 +126,15 @@ void ThreadPool::savingInAddressPool(std::set<std::string> adressWebsite, int se
 				}
 			}
 		}
-
-		blokThread;
 	}
-
-
 }
 
 void ThreadPool::disablingThreadPool() {
 
-	std::unique_lock<std::mutex> lock(block);
+	std::lock_guard lock(block);
 	numberRunningThreads--;
-	
-	if (numberRunningThreads < 3 && indexPoolAdress > poolAdress->size() - 1) {
+	//std::cout << numberRunningThreads << std::endl;
+	if (numberRunningThreads < 5 && indexPoolAdress > poolAdress->size() - 1) {
 	
 		threadIsRunning = false;
 	}
@@ -161,10 +144,10 @@ void ThreadPool::disablingThreadPool() {
 
 void ThreadPool::waitingAddress() {
 
-	std::unique_lock<std::mutex> lock(block);
+	std::unique_lock lock(block);
 	
 	if (threadIsRunning) {
-
+		
 		messages.wait(lock, [&]() {
 
 				if (indexPoolAdress < poolAdress->size() || !threadIsRunning) {
