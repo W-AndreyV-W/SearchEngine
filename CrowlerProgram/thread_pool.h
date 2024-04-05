@@ -5,13 +5,17 @@
 #include <condition_variable>
 #include <thread>
 #include <map>
-#include <boost\asio\strand.hpp>
+#include <boost/asio/strand.hpp>
+//#include <boost/url/pct_string_view.hpp>
+//#include <boost/url/encoding_opts.hpp>
+#include <boost/url/encode.hpp>
 
 #include "download_website.h"
 #include "processing_data_site.h"
 #include "database_website.h"
 
 namespace net = boost::asio;
+namespace urls = boost::urls;
 
 class ThreadPool {
 

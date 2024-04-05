@@ -9,7 +9,7 @@ project(CrawlerProgram)
 
 add_subdirectory("..\\libpqxx-7.9.0" libpqxx-build)
 
-set(BOOST_ROOT C:/boost_1_84_0)
+set(BOOST_ROOT "C:\\boost_1_84_0")
 
 find_package(boost REQUIRED)
 
@@ -40,7 +40,7 @@ if(Boost_FOUND)
 									processing_data_site.cpp
 									thread_pool.h
 									thread_pool.cpp
-	 "https_client.h" "https_client.cpp")
+	  )
 
 	target_link_libraries(CrawlerProgram	pqxx
 											${Boost_LIBRARIES}

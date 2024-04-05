@@ -33,7 +33,7 @@ private:
     http::request<http::empty_body>* request—lient = nullptr;
     http::response<http::string_body>* response—lient = nullptr;
 
-    bool errorClient = false;
+    bool errorClient = true;
     std::string nameError;
     std::vector<std::string>* dataWebsite = nullptr;
 

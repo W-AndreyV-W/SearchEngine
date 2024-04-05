@@ -30,7 +30,7 @@ std::set<std::string> ProcessingDataSite::adressWebsiteForSearch() {
 }
 
 void ProcessingDataSite::processing(std::vector<std::string> data) {
-			
+	
 	delete dataWebsite;
 	delete adressWebsite;
 	delete wordCount;
@@ -67,83 +67,114 @@ void ProcessingDataSite::processing(std::vector<std::string> data) {
 				index = textProcessing(index);
 			}
 		}
-
-
 	}
 }
 
 size_t ProcessingDataSite::addressProcessing(size_t index) {
-
-	size_t indexBegin = index + 9;
-
+	
 	try {
 
-		size_t indexEnd = dataWebsite->at(2).find_first_of(separatorsAdress, indexBegin + 1);
+		index += 9;
+		size_t indexBegin = index;
+		size_t indexEnd = dataWebsite->at(2).find_first_of(separatorsAdress, indexBegin);
 
-		if (indexEnd != std::string::npos) {
+		if (indexEnd != std::string::npos && indexBegin != indexEnd) {
 
-			if (dataWebsite->at(2).substr(indexEnd - 5, 5) == ".html" || dataWebsite->at(2).substr(indexEnd - 4, 4) == ".php") {
+			index = indexEnd;
 
-				indexEnd = dataWebsite->at(2).rfind('/', indexEnd - 4);
+
+			//if (dataWebsite->at(2).substr(indexEnd - 5, 5) == ".html" || dataWebsite->at(2).substr(indexEnd - 4, 4) == ".php") {
+
+			//	indexEnd = dataWebsite->at(2).rfind('/', indexEnd - 4);
+			//}
+			if (dataWebsite->at(2).substr(indexBegin, 1) != "#" && dataWebsite->at(2).substr(indexBegin, 4) != "tel:" && 
+				dataWebsite->at(2).substr(indexBegin, 7) != "mailto:") {
+
+				std::string adressNormaliz = addressNormalization(dataWebsite->at(2).substr(indexBegin, indexEnd - indexBegin));
+
+				size_t sizeAddress = adressNormaliz.size();
+				 //indexAddress = adressNormaliz.find_last_of("/", 0);
+				size_t indexAddress = adressNormaliz.rfind("/", sizeAddress - 1);
+				//std::cout << adressNormaliz << std::endl;
+				if (adressNormaliz != dataWebsite->at(1) && adressNormaliz.find_first_of(".", indexAddress) == std::string::npos) {
+
+					adressWebsite->insert(adressNormaliz);
+					//std::cout << adressNormaliz << std::endl;
+				}
 			}
-
-			addressNormalization(dataWebsite->at(2).substr(indexBegin, indexEnd - indexBegin));
-
-			return indexEnd;
 		}
-
 	}
     catch (std::exception const& errorMessage) {
     }
 
-	return index + 9;
+	return index;
 }
 
-void ProcessingDataSite::addressNormalization(std::string adress) {
+std::string ProcessingDataSite::addressNormalization(std::string address) {
 
-	if (adress.substr(0, 7) != "http://" && adress.substr(0, 8) != "https://") {
+	if (address.substr(0, 7) != "http://" && address.substr(0, 8) != "https://") {
 
-		if (adress.substr(0, 3) == "../") {
+		size_t indexAddress = address.find("//", 0);
 
-			size_t sizeAdress = dataWebsite->at(1).size();
+		if (indexAddress != std::string::npos) {
+
+			address.erase(0, indexAddress + 2);
+		}
+		else if (address.substr(0, 2) == "./") {
+
+			address = dataWebsite->at(1) + address;
+		}
+		else if (address.substr(0, 3) == "../") {
+
+			size_t sizeAddress = dataWebsite->at(1).size();
 
 			do {
 
-				adress.erase(0, 3);
-				size_t indexAdress = dataWebsite->at(1).rfind('/', sizeAdress - 1);
+				address.erase(0, 3);
+				indexAddress = dataWebsite->at(1).rfind("/", sizeAddress - 1);
 
-				if (indexAdress != std::string::npos) {
+				if (indexAddress != std::string::npos) {
 
-					sizeAdress = indexAdress + 1;
+					sizeAddress = indexAddress + 1;
 				}
 
-			} while (adress.substr(0, 3) == "../");
+			} while (address.substr(0, 3) == "../");
 
-			adress = dataWebsite->at(1).substr(0, sizeAdress) + adress;
+			address = dataWebsite->at(1).substr(0, sizeAddress) + address;
 		}
-		else if (adress.substr(0, 1) == "/") {
+		else if (address.substr(0, 1) == "/") {
 
-			size_t sizeAdress = dataWebsite->at(1).find('/', 8);
-			adress = dataWebsite->at(1).substr(0, sizeAdress) + adress;
-		}
-		else if (adress.substr(0, 1) == "#") {
-
-			adress = dataWebsite->at(1) + adress;
+			size_t sizeAddress = dataWebsite->at(1).find('/', 8);
+			address = dataWebsite->at(1).substr(0, sizeAddress) + address;
 		}
 	}
 
-	if (adress != dataWebsite->at(1)) {
+	size_t indexAddress = address.find_first_of({ 0x23, 0x3f }, 0);
 
-		adressWebsite->insert(adress);
+	if (indexAddress != std::string::npos) {
+
+			address.erase(indexAddress, address.size() - indexAddress);
 	}
+
+	size_t sizeAddress = address.size();
+
+	if (address.substr(sizeAddress - 1, 1) == ".") {
+
+		address.erase(sizeAddress - 1, 1);
+	}
+	//std::cout << address << std::endl;
+
+	//std::string addressDecode = urls::pct_string_view(address).decode();
+	//std::string addressLower = locale::to_lower(addressDecode);
+	return address;
 }
 
 size_t ProcessingDataSite::textProcessing(size_t index) {
 
-	size_t indexBegin = 0;
-	size_t indexEnd = 0;
-
 	try {
+
+		size_t indexBegin = 0;
+		size_t indexEnd = 0;
 
 		while (true) {
 
@@ -160,16 +191,15 @@ size_t ProcessingDataSite::textProcessing(size_t index) {
 			}
 			else if (dataWebsite->at(2).substr(indexBegin - 2, 2) == "</") {
 
-				return indexBegin - 3;;
+				return indexBegin - 3;
 			}
 			else if (dataWebsite->at(2).substr(indexBegin - 2, 2) == "<!") {
 
-				return indexBegin - 3;;
+				return indexBegin - 3;
 			}
-			else if (dataWebsite->at(2).at(indexBegin - 1) == '&') {
+			else if (dataWebsite->at(2).at(indexBegin - 1) == '&' || dataWebsite->at(2).at(indexBegin - 2) == '&') {
 
 				index = skipCharacter(indexBegin);
-
 				continue;
 			}
 			else if (dataWebsite->at(2).at(indexBegin) >= 0xfffffff0) {
@@ -182,7 +212,7 @@ size_t ProcessingDataSite::textProcessing(size_t index) {
 				index += 2;
 				continue;
 			}
-			else if (dataWebsite->at(2).at(indexBegin) >= 0xffffffd4) {
+			else if (dataWebsite->at(2).at(indexBegin) >= 0xffffffd2) {
 
 				index++;
 				continue;
@@ -201,49 +231,53 @@ size_t ProcessingDataSite::textProcessing(size_t index) {
 			}
 
 			index = indexEnd;
-
-			bool endToBegin = false;
-
-			do {
-
-				endToBegin = false;
-
-				if (dataWebsite->at(2).at(indexEnd - 4) >= 0xfffffff0) {
-
-					indexEnd -= 4;
-					endToBegin = true;
-				}
-				else if (dataWebsite->at(2).at(indexEnd - 3) >= 0xffffffe0) {
-
-					indexEnd -= 3;
-					endToBegin = true;
-				}
-				else if (dataWebsite->at(2).at(indexEnd - 2) >= 0xffffffd4) {
-
-					indexEnd -= 2;
-					endToBegin = true;
-				}
-				else if (dataWebsite->at(2).at(indexEnd - 2) >= 0xffffffc0 && dataWebsite->at(2).at(indexEnd - 2) < 0xffffffd0) {
-
-					indexEnd -= 2;
-					endToBegin = true;
-				}
-
-			} while (endToBegin);
-
-
-			std::string word = dataWebsite->at(2).substr(indexBegin, indexEnd - indexBegin);
-			std::string wordNormalize = locale::to_lower(locale::normalize(word));
-
+			std::string wordNormalize = wordNormalization(indexBegin, indexEnd);
 			int characters = countingCharacters(wordNormalize);
 			countingWord(characters, wordNormalize);
 		}
-
 	}
     catch (std::exception const& errorMessage) {
     }
 
 	return index;
+}
+
+std::string ProcessingDataSite::wordNormalization(size_t indexBegin, size_t indexEnd) {
+
+
+	bool endToBegin = false;
+
+	do {
+
+		endToBegin = false;
+
+		if (dataWebsite->at(2).at(indexEnd - 4) >= 0xfffffff0) {
+
+			indexEnd -= 4;
+			endToBegin = true;
+		}
+		else if (dataWebsite->at(2).at(indexEnd - 3) >= 0xffffffe0) {
+
+			indexEnd -= 3;
+			endToBegin = true;
+		}
+		else if (dataWebsite->at(2).at(indexEnd - 2) >= 0xffffffd2) {
+
+			indexEnd -= 2;
+			endToBegin = true;
+		}
+		else if (dataWebsite->at(2).at(indexEnd - 2) >= 0xffffffc0 && dataWebsite->at(2).at(indexEnd - 2) < 0xffffffd0) {
+
+			indexEnd -= 2;
+			endToBegin = true;
+		}
+
+	} while (endToBegin);
+
+	std::string word = dataWebsite->at(2).substr(indexBegin, indexEnd - indexBegin);
+	std::string wordNormalize = locale::to_lower(locale::normalize(word));
+
+	return wordNormalize;
 }
 
 int ProcessingDataSite::countingCharacters(std::string word) {

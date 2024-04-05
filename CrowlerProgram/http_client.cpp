@@ -16,7 +16,11 @@ HTTP—lient::~HTTP—lient() {
     delete buffer—lient;
     delete request—lient;
     delete response—lient;
-    delete dataWebsite;
+
+    if (dataWebsite != nullptr) {
+
+        delete dataWebsite;
+    }
 }
 
 std::vector<std::string> HTTP—lient::getRequest() {
@@ -95,13 +99,13 @@ void HTTP—lient::readWebsite(beast::error_code errorMessage, std::size_t bytesTr
     }
 
     saveDataWebsite();
-    errorClient = true;
+    errorClient = false;
 
     stream—lient->socket().shutdown(tcp::socket::shutdown_both, errorMessage);
 
     if (errorMessage && errorMessage != beast::errc::not_connected) {
 
-        httpError("Shutdown", errorMessage);
+        //httpError("Shutdown", errorMessage);
         return;
     }
 }

@@ -11,7 +11,13 @@ ThreadPool::ThreadPool(std::vector<std::string> initialData) {
 	databaseInit->at(2) = initialData.at(2);
 	databaseInit->at(3) = initialData.at(3);
 	databaseInit->at(4) = initialData.at(4);
-	poolAdress->emplace_back(std::pair<std::string, int>(initialData.at(5), std::stoi(initialData.at(6))));
+
+	urls::encoding_opts encodingOpts;
+	encodingOpts.disallow_null = true;
+	std::string requestEncode = urls::encode(initialData.at(5), urls::pchars + '/', encodingOpts);
+
+
+	poolAdress->emplace_back(std::pair<std::string, int>(requestEncode, std::stoi(initialData.at(6))));
 
 	poolScanningWebsite();
 }
@@ -38,46 +44,54 @@ void ThreadPool::poolScanningWebsite() {
 }
 
 void ThreadPool::scanningWebsite() {
+	
+	try {
 
-	DownloadWebsite downloadWebsite;
-	ProcessingDataSite processingDataSite;
-	std::unique_lock lock(block);
-	DatabaseWebsite databaseWebsite(*databaseInit);
-	lock.unlock();
-	int search = 0;
-	std::vector<std::string> request(1);
+		DownloadWebsite downloadWebsite;
+		ProcessingDataSite processingDataSite;
+		std::unique_lock lock(block);
+		DatabaseWebsite databaseWebsite(*databaseInit);
+		lock.unlock();
+		int search = 0;
+		std::vector<std::string> request(1);
 
-	while (true) {
-		
-		bool working = readingFromAddressPool(request, search);
+		while (true) {
 
-		if (working) {
+			bool working = readingFromAddressPool(request, search);
 
-			if (downloadWebsite.download(request)) {
-				
-				processingDataSite.processing(downloadWebsite.getRequest());
+			if (working) {
+				//std::cout << "!!!!!!!!!!!!" << std::endl;
+				if (downloadWebsite.download(request)) {
+					
+					processingDataSite.processing(downloadWebsite.getRequest());
 
-				std::jthread saveDatabese([&]() {
-					databaseWebsite.writingDatabase(processingDataSite.adressWebsiteInDatabase(), processingDataSite.wordCounInDatabasee()); 
-					}
-				);
+					std::jthread saveDatabese([&]() {
+						databaseWebsite.writingDatabase(processingDataSite.adressWebsiteInDatabase(), processingDataSite.wordCounInDatabasee());
+						}
+					);
 
-				savingInAddressPool(processingDataSite.adressWebsiteForSearch(), search);
+					savingInAddressPool(processingDataSite.adressWebsiteForSearch(), search);
+				}
 
 				disablingThreadPool();
 			}
-		}
-		else {
-			
-			waitingAddress();
-		}
+			else {
 
-		std::lock_guard lock(block);
+				waitingAddress();
+			}
 
-		if (!threadIsRunning) {
+			std::lock_guard lock(block);
 
-			break;
+			if (!threadIsRunning) {
+
+				break;
+			}
 		}
+	}
+	catch (std::exception const& errorMessage) {
+
+		//nameError = errorMessage.what();
+		//error = false;
 	}
 	//std::cout << "!!!!!!!!!!!!" << std::endl;
 }
@@ -134,7 +148,7 @@ void ThreadPool::disablingThreadPool() {
 	std::lock_guard lock(block);
 	numberRunningThreads--;
 	//std::cout << numberRunningThreads << std::endl;
-	if (numberRunningThreads < 5 && indexPoolAdress > poolAdress->size() - 1) {
+	if (numberRunningThreads < 1 && indexPoolAdress > poolAdress->size() - 1) {
 	
 		threadIsRunning = false;
 	}

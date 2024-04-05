@@ -16,7 +16,11 @@ HTTPS—lient::~HTTPS—lient() {
     delete buffer—lient;
     delete request—lient;
     delete response—lient;
-    delete dataWebsite;
+
+    if (dataWebsite != nullptr) {
+
+        delete dataWebsite;
+    }
 }
 
 std::vector<std::string> HTTPS—lient::getRequest() {
@@ -37,6 +41,8 @@ void HTTPS—lient::httpError(char const* what, beast::error_code& errorMessage) {
 }
 
 void HTTPS—lient::run(char const* host, char const* port, char const* target, int version) {
+
+    
 
     if (!SSL_set_tlsext_host_name(stream—lient->native_handle(), host)) {
 
@@ -113,7 +119,7 @@ void HTTPS—lient::readWebsite(beast::error_code errorMessage, std::size_t bytesT
     }
 
     saveDataWebsite();
-    errorClient = true;
+    errorClient = false;
 
     beast::get_lowest_layer(*stream—lient).expires_after(std::chrono::seconds(30));
     stream—lient->async_shutdown(beast::bind_front_handler(&HTTPS—lient::shutdownWebsite, shared_from_this()));
@@ -128,7 +134,7 @@ void HTTPS—lient::shutdownWebsite(beast::error_code errorMessage) {
 
     if (errorMessage) {
 
-        httpError("Shutdown", errorMessage);
+        //httpError("Shutdown", errorMessage);
         return;
     }
 }
@@ -142,6 +148,8 @@ void HTTPS—lient::saveDataWebsite() {
     if (response—lient->result_int() == 200) {
 
         dataWebsite->at(2) = response—lient->body();
+
+        //std::cout << *response—lient << std::endl;
     }
     else {
 
