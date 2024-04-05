@@ -85,7 +85,5 @@ void HTTPConnection::createSession(beast::error_code error, tcp::socket socket) 
 
 void HTTPConnection::httpError(char const* what, beast::error_code& errorMessage) {
 
-    //errorClient = true;
-
     errorConnection = what + ' ' + errorMessage.message();
 }

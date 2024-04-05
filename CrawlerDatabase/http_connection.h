@@ -1,22 +1,22 @@
 #pragma once
 
-#include <boost/beast/core.hpp>
-#include <boost/beast/ssl.hpp>
-#include <boost/beast/version.hpp>
-#include <boost/asio/dispatch.hpp>
-#include <boost/asio/strand.hpp>
-#include <boost/config.hpp>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
+//#include <boost/beast/core.hpp>
+//#include <boost/beast/ssl.hpp>
+//#include <boost/beast/version.hpp>
+#include <boost/asio/dispatch.hpp>
+#include <boost/asio/strand.hpp>
+//#include <boost/config.hpp>
 
 #include "libs/beast/example/common/server_certificate.hpp"
 #include "return_response.h"
 #include "http_connect.h"
 
-namespace beast = boost::beast;
+//namespace beast = boost::beast;
 namespace net = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;

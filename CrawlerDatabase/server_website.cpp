@@ -8,6 +8,7 @@ ServerWebsite::ServerWebsite(std::vector<std::string> connectionDada, std::vecto
     numberThreads = std::thread::hardware_concurrency() / 2 + 1;
     codWebsite = htmlWebsite;
 }
+
 void ServerWebsite::startServer() {
 
     net::io_context ioContext{ numberThreads };

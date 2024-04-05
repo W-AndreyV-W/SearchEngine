@@ -122,11 +122,11 @@ http::message_generator HTTPConnect::handleRequest(beast::string_view rootDirect
 
     if (request.target().substr(0, 7) == "/?text=") {
 
-        std::string searchField = request.target().substr(7, request.target().size() - 5);
+        std::string searchField = request.target().substr(7, request.target().size() - 7);
         return messagesRequest(request, http::status::ok, codWebsite + returnResponse->responseDatabese(searchField));
     }
 
-    return messagesRequest(request, http::status::ok, codWebsite);
+    return messagesRequest(request, http::status::ok, codWebsite + "</html>");
 }
 
 template <class Body, class Allocator>

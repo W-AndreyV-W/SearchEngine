@@ -1,24 +1,24 @@
 #pragma once
 #pragma execution_character_set( "utf-8" )
 
+#include <iostream>
+#include <string>
+//#include <string_view>
+//#include <vector>
+//#include <cstdlib>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
-#include <boost/locale.hpp>
-#include <boost/config.hpp>
-#include <iostream>
-#include <string>
-#include <string_view>
-#include <vector>
-#include <cstdlib>
+//#include <boost/locale.hpp>
+//#include <boost/config.hpp>
 
 #include "libs/beast/example/common/server_certificate.hpp"
 #include "return_response.h"
 
-namespace locale = boost::locale;
+//namespace locale = boost::locale;
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
