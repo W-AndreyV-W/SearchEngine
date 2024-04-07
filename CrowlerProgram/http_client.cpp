@@ -25,7 +25,7 @@ HTTPÑlient::~HTTPÑlient() {
 
 std::vector<std::string> HTTPÑlient::getRequest() {
 
-    return *dataWebsite;
+    return std::move(*dataWebsite);
 }
 
 bool HTTPÑlient::getHTTPError(std::string& errorName) {
@@ -47,7 +47,6 @@ void HTTPÑlient::run(char const* host, char const* port, char const* target, int
     requestÑlient->target(target);
     requestÑlient->set(http::field::host, host);
     requestÑlient->set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-
     resolverÑlient->async_resolve(host, port, beast::bind_front_handler(&HTTPÑlient::resolveWebsite, shared_from_this()));
 }
 
@@ -100,12 +99,10 @@ void HTTPÑlient::readWebsite(beast::error_code errorMessage, std::size_t bytesTr
 
     saveDataWebsite();
     errorClient = false;
-
     streamÑlient->socket().shutdown(tcp::socket::shutdown_both, errorMessage);
 
     if (errorMessage && errorMessage != beast::errc::not_connected) {
 
-        //httpError("Shutdown", errorMessage);
         return;
     }
 }

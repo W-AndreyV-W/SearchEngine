@@ -1,8 +1,8 @@
 #include "file_open.h"
 
-bool FileOpen::iniParser(const std::string filename) {
+bool FileOpen::iniParser(const std::string fileName) {
 
-    readFile.open(filename);
+    readFile.open(fileName);
 
     if (readFile.is_open()) {
 
@@ -47,9 +47,9 @@ std::string FileOpen::errorInit() {
     return errorFile;
 }
 
-std::string FileOpen::readingFile(std::string filename) {
+std::string FileOpen::readingFile(std::string fileName) {
 
-    readFile.open(filename);
+    readFile.open(fileName);
     std::string dataFile = "";
 
     if (readFile.is_open()) {

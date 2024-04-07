@@ -29,32 +29,6 @@ void DatabaseWebsite::connectDatabase(std::vector<std::string> connectionData) {
     }
 }
 
-std::map<std::string, int> DatabaseWebsite::requestDatabase(std::string request, int numberLines) {
-
-    std::map<std::string, int> answer;
-
-    try {
-
-        if (!request.empty()) {
-
-            pqxx::work selectSQL{ *sql };
-            std::string lines = std::to_string(numberLines);
-
-            for (const auto& [website, number] : selectSQL.stream<std::string, int>(selectData1 + selectSQL.esc(request) +
-                selectData2 + lines + selectData3)) {
-
-                answer.emplace(website, number);
-            }
-
-            selectSQL.commit();
-        }
-    }
-    catch (std::exception& error) {
-    }
-
-    return answer;
-}
-
 bool DatabaseWebsite::writingDatabase(std::string address, std::map<std::string, int> searchData) {
 
     bool noError = true;

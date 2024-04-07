@@ -7,12 +7,6 @@
 #include <vector>
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
-//#include <cstdlib>
-
-
-//#pragma comment(lib, "libssl.lib")
-//#pragma comment(lib, "libcrypto.lib")
-//#pragma comment(lib, "crypt32.lib")
 
 #include "libs/beast/example/common/server_certificate.hpp"
 #include "http_connection.h"
@@ -36,4 +30,3 @@ private:
     tcp::endpoint* tcpEndpoint = nullptr;
     std::shared_ptr<std::string const>* rootDirectory = nullptr;
 };
-

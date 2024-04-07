@@ -5,18 +5,13 @@
 #include <memory>
 #include <string>
 #include <vector>
-//#include <boost/beast/core.hpp>
-//#include <boost/beast/ssl.hpp>
-//#include <boost/beast/version.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
-//#include <boost/config.hpp>
 
 #include "libs/beast/example/common/server_certificate.hpp"
 #include "return_response.h"
 #include "http_connect.h"
 
-//namespace beast = boost::beast;
 namespace net = boost::asio;
 namespace ssl = boost::asio::ssl;
 using tcp = boost::asio::ip::tcp;
@@ -35,7 +30,6 @@ public:
 private:
 
     ReturnResponse* returnResponse;
-
     net::io_context& ioContext;
     ssl::context& sslContext;
     tcp::acceptor acceptorConnection;
@@ -48,4 +42,3 @@ private:
     void createSession(beast::error_code error, tcp::socket socket);
     void httpError(char const* what, beast::error_code& errorMessage);
 };
-

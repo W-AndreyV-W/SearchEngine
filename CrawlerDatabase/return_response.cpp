@@ -3,6 +3,10 @@
 ReturnResponse::ReturnResponse(std::vector<std::string> connectionData) {
 
 	databaseWebsite = new DatabaseWebsite(connectionData, false);
+
+	locale::generator generatorLocale;
+	std::locale loccaleConversions = generatorLocale(" ");
+	std::locale::global(loccaleConversions);
 }
 
 std::string ReturnResponse::responseDatabese(std::string request) {
@@ -19,33 +23,32 @@ std::vector<std::string> ReturnResponse::prepareRequest(std::string req) {
 	size_t indexBegin = 0;
 	size_t indexEnd = 0;
 	std::string word;
-	std::string request;
 	std::vector<std::string> response;
 
 	if (!req.empty()) {
 
-		request = urls::pct_string_view(req).decode();
+		std::string request = urls::pct_string_view(req).decode();
+		std::string requestLower = locale::to_lower(request);
 
 		for (int i = 0; i < 4 && indexBegin != std::string::npos; i++) {
 
-			indexBegin = request.find_first_not_of("+", indexEnd);
-			indexEnd = request.find_first_of("+", indexBegin);
+			indexBegin = requestLower.find_first_not_of("+", indexEnd);
+			indexEnd = requestLower.find_first_of("+", indexBegin);
 
 			if (indexBegin != std::string::npos) {
 
 				if (indexEnd != std::string::npos) {
 				
-					word = request.substr(indexBegin, indexEnd - indexBegin);
+					word = requestLower.substr(indexBegin, indexEnd - indexBegin);
 				}
 				else {
 
-					word = request.substr(indexBegin, request.size() - indexBegin);
+					word = requestLower.substr(indexBegin, requestLower.size() - indexBegin);
 				}
 				
 				if (word.size() > 2) {
 
 					response.emplace_back(word);
-					std::cout << word << std::endl;
 				}
 				else {
 
@@ -105,7 +108,7 @@ std::multimap<int, std::string, std::greater<int>> ReturnResponse::websiteSortin
 std::string ReturnResponse::responseString(std::multimap<int, std::string, std::greater<int>> requestWebsite) {
 
 	int i = 1;
-	std::string linkWebsite = "<hr><hr><hr>";
+	std::string linkWebsite = linkWebsite;
 
 	if (!requestWebsite.empty()) {
 

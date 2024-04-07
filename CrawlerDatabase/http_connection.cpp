@@ -1,7 +1,8 @@
 #include "http_connection.h"
 
 
-HTTPConnection::HTTPConnection(net::io_context& ioc, ssl::context& ctx, tcp::endpoint endpoint, std::shared_ptr<std::string const> const& doc_root, 
+HTTPConnection::HTTPConnection(net::io_context& ioc, ssl::context& ctx, tcp::endpoint endpoint, 
+                               std::shared_ptr<std::string const> const& doc_root, 
                                std::vector<std::string> connectionData, std::string htmlWebsite) : 
                                ioContext(ioc), sslContext(ctx), acceptorConnection(ioc), rootDirectory(doc_root) {
 
@@ -14,7 +15,6 @@ HTTPConnection::HTTPConnection(net::io_context& ioc, ssl::context& ctx, tcp::end
     if (error) {
 
         httpError("open", error);
-
         return;
     }
 
@@ -23,7 +23,6 @@ HTTPConnection::HTTPConnection(net::io_context& ioc, ssl::context& ctx, tcp::end
     if (error) {
 
         httpError("set option", error);
-
         return;
     }
 
@@ -32,7 +31,6 @@ HTTPConnection::HTTPConnection(net::io_context& ioc, ssl::context& ctx, tcp::end
     if (error) {
 
         httpError("bind", error);
-
         return;
     }
 
@@ -41,7 +39,6 @@ HTTPConnection::HTTPConnection(net::io_context& ioc, ssl::context& ctx, tcp::end
     if (error) {
 
         httpError("listen", error);
-
         return;
     }
 }
@@ -72,7 +69,6 @@ void HTTPConnection::createSession(beast::error_code error, tcp::socket socket) 
     if (error) {
 
         httpError("accept", error);
-
         return;
     }
     else {

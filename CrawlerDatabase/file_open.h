@@ -11,10 +11,10 @@ class FileOpen {
 
 public:
 
-    bool iniParser(std::string filename);
+    bool iniParser(std::string fileName);
     std::string getValue(std::string section, std::string title);
     std::string errorInit();
-    std::string readingFile(std::string filename);
+    std::string readingFile(std::string fileName);
 
 private:
 
@@ -26,4 +26,3 @@ private:
 
     void dataPerser(std::string line, int numberLine);
 };
-

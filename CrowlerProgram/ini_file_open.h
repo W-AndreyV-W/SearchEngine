@@ -25,4 +25,3 @@ private:
 
     void dataPerser(std::string line, int numberLine);
 };
-

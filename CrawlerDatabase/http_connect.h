@@ -3,22 +3,16 @@
 
 #include <iostream>
 #include <string>
-//#include <string_view>
-//#include <vector>
-//#include <cstdlib>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
-//#include <boost/locale.hpp>
-//#include <boost/config.hpp>
 
 #include "libs/beast/example/common/server_certificate.hpp"
 #include "return_response.h"
 
-//namespace locale = boost::locale;
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
@@ -29,7 +23,8 @@ class HTTPConnect : public std::enable_shared_from_this<HTTPConnect> {
 
 public:
 
-    HTTPConnect(tcp::socket&& socket, ssl::context& ctx, std::shared_ptr<std::string const> const& doc_root, ReturnResponse* response, std::string htmlWebsite);
+    HTTPConnect(tcp::socket&& socket, ssl::context& ctx, std::shared_ptr<std::string const> const& doc_root, 
+                ReturnResponse* response, std::string htmlWebsite);
     ~HTTPConnect();
     void run();
     std::string errorHTTPConnect();
@@ -37,7 +32,6 @@ public:
 private:
 
     ReturnResponse* returnResponse;
-
     beast::ssl_stream<beast::tcp_stream> streamServer;
     std::shared_ptr<std::string const> rootDirectory;
     beast::flat_buffer bufferServer;

@@ -5,10 +5,12 @@
 #include <vector>
 #include <map>
 #include <boost/url.hpp>
+#include <boost/locale.hpp>
 
 #include "database_website.h"
 
 namespace urls = boost::urls;
+namespace locale = boost::locale;
 
 class ReturnResponse {
 
@@ -22,6 +24,7 @@ private:
 
     DatabaseWebsite* databaseWebsite;
 
+    std::string linkWebsite = "<hr><hr><hr></br>";
     std::string linkWebsite0 = "<p><a href=";
     std::string linkWebsite1 = " target=";
     std::string linkWebsite2 = "_blank";
@@ -34,5 +37,3 @@ private:
     std::multimap<int, std::string, std::greater<int>> websiteSorting(std::vector<std::map<std::string, int>> response);
     std::string responseString(std::multimap<int, std::string, std::greater<int>> requestWebsite);
 };
-
-

@@ -11,13 +11,7 @@ ThreadPool::ThreadPool(std::vector<std::string> initialData) {
 	databaseInit->at(2) = initialData.at(2);
 	databaseInit->at(3) = initialData.at(3);
 	databaseInit->at(4) = initialData.at(4);
-
-	urls::encoding_opts encodingOpts;
-	encodingOpts.disallow_null = true;
-	std::string requestEncode = urls::encode(initialData.at(5), urls::pchars + '/', encodingOpts);
-
-
-	poolAdress->emplace_back(std::pair<std::string, int>(requestEncode, std::stoi(initialData.at(6))));
+	poolAdress->emplace_back(std::pair<std::string, int>(initialData.at(5), std::stoi(initialData.at(6))));
 
 	poolScanningWebsite();
 }
@@ -60,7 +54,7 @@ void ThreadPool::scanningWebsite() {
 			bool working = readingFromAddressPool(request, search);
 
 			if (working) {
-				//std::cout << "!!!!!!!!!!!!" << std::endl;
+
 				if (downloadWebsite.download(request)) {
 					
 					processingDataSite.processing(downloadWebsite.getRequest());
@@ -89,11 +83,7 @@ void ThreadPool::scanningWebsite() {
 		}
 	}
 	catch (std::exception const& errorMessage) {
-
-		//nameError = errorMessage.what();
-		//error = false;
 	}
-	//std::cout << "!!!!!!!!!!!!" << std::endl;
 }
 
 
@@ -108,9 +98,7 @@ bool ThreadPool::readingFromAddressPool(std::vector<std::string>& request, int& 
 		request.at(0) = poolAdress->at(indexPoolAdress).first;
 		search = poolAdress->at(indexPoolAdress).second - 1;
 		indexPoolAdress++;
-
-		std::cout << poolAdress->size() << " " << indexPoolAdress << " " << request.at(0) << std::endl;
-
+		//std::cout << poolAdress->size() << " " << indexPoolAdress << " " << request.at(0) << std::endl;
 		return true;
 	}
 
@@ -147,7 +135,7 @@ void ThreadPool::disablingThreadPool() {
 
 	std::lock_guard lock(block);
 	numberRunningThreads--;
-	//std::cout << numberRunningThreads << std::endl;
+
 	if (numberRunningThreads < 1 && indexPoolAdress > poolAdress->size() - 1) {
 	
 		threadIsRunning = false;

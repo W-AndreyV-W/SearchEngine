@@ -6,8 +6,6 @@
 #include <map>
 #include <pqxx/pqxx>
 
-//#pragma comment(lib, "pqxx.lib")
-
 class DatabaseWebsite {
 
 public:
@@ -61,16 +59,6 @@ private:
                                 "FROM key_word, key_website "
                                 "ON CONFLICT ON CONSTRAINT quantityword_unique DO UPDATE "
                                 "SET quantity = EXCLUDED.quantity;";
-
-    std::string selectData1 =   "SELECT website_name, qw.quantity "
-                                "FROM website ws "
-                                "JOIN quantityword qw ON ws.id_website = qw.website_id "
-                                "JOIN word wd ON qw.word_id = wd.id_word "
-                                "WHERE wd.word_website LIKE '";
-    std::string selectData2 =   "' ORDER BY qw.quantity DESC "
-                                "LIMIT '";
-    std::string selectData3 =   "'";
-    bool firstStart = false;
 
     void connectDatabase(std::vector<std::string> connectionData);
 };

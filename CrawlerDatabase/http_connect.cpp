@@ -100,8 +100,6 @@ void HTTPConnect::shutdownConnect(beast::error_code error) {
 
 void HTTPConnect::httpError(char const* what, beast::error_code& errorMessage) {
 
-    //errorClient = true;
-
     errorConnect = what + ' ' + errorMessage.message();
 }
 
@@ -109,8 +107,8 @@ void HTTPConnect::httpError(char const* what, beast::error_code& errorMessage) {
 template <class Body, class Allocator>
 http::message_generator HTTPConnect::handleRequest(beast::string_view rootDirectory, http::request<Body, 
                                                    http::basic_fields<Allocator>>&& request) {
-
-    if (request.method() != http::verb::get && request.method() != http::verb::head) {
+    std::cout << request.body() << std::endl;
+    if (request.method() != http::verb::get && request.method() != http::verb::post) {
 
         return messagesRequest(request, http::status::bad_request, "Unknown HTTP-method");
     }
@@ -120,13 +118,13 @@ http::message_generator HTTPConnect::handleRequest(beast::string_view rootDirect
         return messagesRequest(request, http::status::bad_request, "Illegal request-target");
     }
 
-    if (request.target().substr(0, 7) == "/?text=") {
+    if (request.body().substr(0, 5) == "text=") {
 
-        std::string searchField = request.target().substr(7, request.target().size() - 7);
+        std::string searchField = request.body().substr(5, request.body().size() - 5);
         return messagesRequest(request, http::status::ok, codWebsite + returnResponse->responseDatabese(searchField));
     }
 
-    return messagesRequest(request, http::status::ok, codWebsite + "</html>");
+    return messagesRequest(request, http::status::ok, codWebsite);
 }
 
 template <class Body, class Allocator>
