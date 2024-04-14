@@ -1,5 +1,7 @@
 #include "transfer_protocol_client.h"
 
+TransferProtocol—lient::TransferProtocol—lient(std::string& cert) : certificates(cert) {
+}
 
 std::string TransferProtocol—lient::getError() {
 
@@ -29,7 +31,7 @@ bool TransferProtocol—lient::requestHTTPS(std::vector<std::string>* dataWebsite,
 
             net::io_context ioContext;
             ssl::context sslContext{ ssl::context::tlsv12_client };
-            load_root_certificates(sslContext);
+            loadCertificates(sslContext);
             sslContext.set_verify_mode(ssl::verify_peer);
             std::shared_ptr<HTTPS—lient> https—lient = std::make_shared<HTTPS—lient>(net::make_strand(ioContext), sslContext);
             https—lient->run(requestWeb.at(0).data(), requestWeb.at(1).data(), requestWeb.at(2).data(), version);
@@ -78,4 +80,15 @@ bool TransferProtocol—lient::requestHTTP(std::vector<std::string>* dataWebsite, 
     }
 
     return !error;
+}
+
+inline void TransferProtocol—lient::loadCertificates(ssl::context& ctx) {
+
+    boost::system::error_code errorCode;
+    ctx.add_certificate_authority(boost::asio::buffer(certificates.data(), certificates.size()), errorCode);
+
+    if (errorCode) {
+
+        throw boost::system::system_error{ errorCode };
+    }
 }

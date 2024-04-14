@@ -1,6 +1,6 @@
 #include "thread_pool.h"
 
-ThreadPool::ThreadPool(std::vector<std::string> initialData) {
+ThreadPool::ThreadPool(std::vector<std::string> initialData, std::string& cert) {
 
 	databaseInit = new std::vector<std::string>(5);
 	poolAdress = new std::vector<std::pair<std::string, int>>;
@@ -12,6 +12,7 @@ ThreadPool::ThreadPool(std::vector<std::string> initialData) {
 	databaseInit->at(3) = initialData.at(3);
 	databaseInit->at(4) = initialData.at(4);
 	poolAdress->emplace_back(std::pair<std::string, int>(initialData.at(5), std::stoi(initialData.at(6))));
+	certificates = cert;
 
 	poolScanningWebsite();
 }
@@ -41,9 +42,9 @@ void ThreadPool::scanningWebsite() {
 	
 	try {
 
-		DownloadWebsite downloadWebsite;
 		ProcessingDataSite processingDataSite;
 		std::unique_lock lock(block);
+		DownloadWebsite downloadWebsite(certificates);
 		DatabaseWebsite databaseWebsite(*databaseInit);
 		lock.unlock();
 		int search = 0;

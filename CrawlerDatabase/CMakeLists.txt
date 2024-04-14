@@ -30,6 +30,8 @@ if(Boost_FOUND)
 									database_website.cpp
 									file_open.h
 									file_open.cpp
+									certificates_file_open.h
+									certificates_file_open.cpp
 									http_connect.h
 									http_connect.cpp
 									http_connection.h

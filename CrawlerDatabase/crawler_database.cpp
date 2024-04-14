@@ -3,6 +3,7 @@
 
 #include "server_website.h"
 #include "file_open.h"
+#include "certificates_file_open.h"
 
 #pragma execution_character_set( "utf-8" )
 
@@ -11,7 +12,8 @@ int main() {
     SetConsoleOutputCP(CP_UTF8);
 
 	FileOpen fileOpen;
-    
+    CertificatesFileOpen certificatesFileOpen;
+
     std::vector<std::string> request(7);
 	std::vector<std::string> connectionDada(3);
 
@@ -26,11 +28,16 @@ int main() {
         request.at(6) = fileOpen.getValue("Section2", "recursion");
         connectionDada.at(0) = fileOpen.getValue("Section3", "adress");
         connectionDada.at(1) = fileOpen.getValue("Section3", "port");
-        connectionDada.at(2) = fileOpen.getValue("Section3", "doc_root");        
-    }
+        connectionDada.at(2) = fileOpen.getValue("Section3", "doc_root");
 
-	ServerWebsite serverWebsite(connectionDada, request, fileOpen.readingFile("../../../html_website.htm"));
-	serverWebsite.startServer();
+        std::vector<std::string> certificate = certificatesFileOpen.readingFile("../../../certificates.txt");
+
+        if (certificate.size() >= 3) {
+
+	        ServerWebsite serverWebsite(connectionDada, request, certificate, fileOpen.readingFile("../../../html_website.htm"));
+	        serverWebsite.startServer();
+        }
+    }
 
 	return 0;
 }

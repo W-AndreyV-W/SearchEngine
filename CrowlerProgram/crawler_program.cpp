@@ -9,6 +9,7 @@
 
 #include "thread_pool.h"
 #include "ini_file_open.h"
+#include "certificates_file_open.h"
 
 namespace urls = boost::urls;
 
@@ -17,6 +18,8 @@ int main() {
     SetConsoleOutputCP(CP_UTF8);
 
     IniFileOpen iniFileOpen;
+    CertificatesFileOpen certificatesFileOpen;
+
     std::vector<std::string> request(7);
 
     if (iniFileOpen.iniParser("../../../program.ini")) {
@@ -31,7 +34,8 @@ int main() {
         request.at(4) = iniFileOpen.getValue("Section1", "password");
         request.at(5) = urls::encode(iniFileOpen.getValue("Section2", "adress"), urls::pchars + '/', encodingOpts);
         request.at(6) = iniFileOpen.getValue("Section2", "recursion");
-    }
+        std::string certificates = certificatesFileOpen.readingFile("../../../certificates.txt");
 
-    ThreadPool threadPool(request);
+        ThreadPool threadPool(request, certificates);
+    }
 }

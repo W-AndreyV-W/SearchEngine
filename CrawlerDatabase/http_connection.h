@@ -8,7 +8,6 @@
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
 
-#include "libs/beast/example/common/server_certificate.hpp"
 #include "return_response.h"
 #include "http_connect.h"
 

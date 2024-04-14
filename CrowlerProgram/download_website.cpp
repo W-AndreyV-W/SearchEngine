@@ -1,8 +1,8 @@
 #include "download_website.h"
 
-DownloadWebsite::DownloadWebsite() {
+DownloadWebsite::DownloadWebsite(std::string& cert) {
 
-    transferProtocol—lient = new TransferProtocol—lient;
+    transferProtocol—lient = new TransferProtocol—lient(cert);
     requestWeb = new std::vector<std::string>(4);
 }
 

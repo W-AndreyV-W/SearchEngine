@@ -8,7 +8,6 @@
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
 
-#include "libs/beast/example/common/server_certificate.hpp"
 #include "http_connection.h"
 
 namespace net = boost::asio;
@@ -19,7 +18,7 @@ class ServerWebsite {
 
 public:
 
-    ServerWebsite(std::vector<std::string> connectionDada, std::vector<std::string> connectionDatabase, std::string htmlWebsite);
+    ServerWebsite(std::vector<std::string> connectionDada, std::vector<std::string> connectionDatabase, std::vector<std::string> cert, std::string htmlWebsite);
     void startServer();
 
 private:
@@ -27,6 +26,9 @@ private:
     int numberThreads = 1;
     std::string codWebsite;
     std::vector<std::string> connectionDatabase;
+    std::vector<std::string> certificate;
     tcp::endpoint* tcpEndpoint = nullptr;
     std::shared_ptr<std::string const>* rootDirectory = nullptr;
+
+    inline void serverCertificate(boost::asio::ssl::context& ctx);
 };

@@ -17,7 +17,7 @@ class ThreadPool {
 
 public:
 
-	ThreadPool(std::vector<std::string> initialData);
+	ThreadPool(std::vector<std::string> initialData, std::string& cert);
 	~ThreadPool();
 
 private:
@@ -32,6 +32,7 @@ private:
 	std::vector<std::string>* databaseInit = nullptr;	
 	std::vector<std::jthread>* poolThread = nullptr;
 	std::vector<std::pair<std::string, int>>* poolAdress = nullptr;
+	std::string certificates;
 
 	void poolScanningWebsite();
 	void scanningWebsite();

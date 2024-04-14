@@ -18,7 +18,7 @@ class DownloadWebsite {
 
 public:
 
-    DownloadWebsite();
+    DownloadWebsite(std::string& cert);
     ~DownloadWebsite();
 
     bool download(std::vector<std::string> request);

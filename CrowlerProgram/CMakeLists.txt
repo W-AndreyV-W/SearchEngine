@@ -36,13 +36,15 @@ if(Boost_FOUND)
 									http_client.cpp
 									https_client.h
 									https_client.cpp
+									certificates_file_open.h
+									certificates_file_open.cpp
 									ini_file_open.h
 									ini_file_open.cpp
 									processing_data_site.h
 									processing_data_site.cpp
 									thread_pool.h
 									thread_pool.cpp
-	  )
+	)
 
 	target_link_libraries(CrawlerProgram	pqxx
 											${Boost_LIBRARIES}
